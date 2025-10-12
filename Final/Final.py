@@ -3,11 +3,11 @@ import json
 import re
 print("Поехали")
 
-with open('traders.txt','r') as f:
+with open('C:/Users/chamb/Desktop/HSE_Evgeny_Baranov/Final/traders.txt','r') as f:
     INN_list = [line.strip() for line in f if line.strip()]
 print("Список ИНН из файла traders.txt:", INN_list)
 
-with open ('traders.json', 'r') as f:
+with open ('C:/Users/chamb/Desktop/HSE_Evgeny_Baranov/Final/traders.json', 'r') as f:
     traders = json.load(f)
     filtered_traders = []
     for t in traders:
@@ -33,7 +33,7 @@ def find_emails(text):
 
 emails_by_inn = {}
 
-with open('1000_efrsb_messages.json', 'r', encoding='utf-8') as f:
+with open('C:/Users/chamb/Desktop/HSE_Evgeny_Baranov/Final/1000_efrsb_messages.json', 'r', encoding='utf-8') as f:
     messages = json.load(f)
 
 for msg in messages:

@@ -22,3 +22,12 @@ def roman_to_int(s):
 print (roman_to_int('III'))
 print (roman_to_int ('LVIII'))
 print (roman_to_int ('MCMXCIV'))
+
+def is_monotonic(nums):
+    increasing = all(x <= y for x, y in zip(nums, nums[1:]))
+    decreasing = all(x >= y for x, y in zip(nums, nums[1:]))
+    return increasing or decreasing
+
+print(is_monotonic([1,2,2,3]))    # True
+print(is_monotonic([6,5,4,4]))    # True
+print(is_monotonic([1,3,2]))      # False

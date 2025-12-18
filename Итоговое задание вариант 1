@@ -1,0 +1,189 @@
+CREATE DATABASE IF NOT EXISTS university_db;
+USE university_db;
+
+CREATE TABLE groups (
+    group_id INT PRIMARY KEY AUTO_INCREMENT,
+    group_name VARCHAR(50) NOT NULL UNIQUE,
+    specialization VARCHAR(100),
+    year_of_admission YEAR NOT NULL
+);
+
+CREATE TABLE students (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    patronymic VARCHAR(50),
+    date_of_birth DATE NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    phone_number VARCHAR(20),
+    address VARCHAR(200),
+    group_id INT NOT NULL,
+    enrollment_year YEAR NOT NULL,
+    FOREIGN KEY (group_id) REFERENCES groups(group_id),
+    INDEX idx_students_group_id (group_id)
+);
+CREATE TABLE teachers (
+    teacher_id INT PRIMARY KEY AUTO_INCREMENT,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    patronymic VARCHAR(50),
+    date_of_birth DATE NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    phone_number VARCHAR(20),
+    office_number VARCHAR(20),
+    academic_degree VARCHAR(100),
+    hire_date DATE NOT NULL,
+    UNIQUE KEY unique_teacher_fio (first_name, last_name, patronymic)
+);
+CREATE TABLE subject_categories (
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    category_name VARCHAR(50) NOT NULL UNIQUE,
+    category_type ENUM('Mathematical', 'Humanitarian', 'Technical', 'Physical') NOT NULL
+);
+CREATE TABLE subjects (
+    subject_id INT PRIMARY KEY AUTO_INCREMENT,
+    subject_name VARCHAR(100) NOT NULL,
+    category_id INT NOT NULL,
+    hours INT NOT NULL,
+    FOREIGN KEY (category_id) REFERENCES subject_categories(category_id),
+    UNIQUE KEY unique_subject (subject_name),
+    INDEX idx_category (category_id)
+    );
+CREATE TABLE teaching (
+    teaching_id INT PRIMARY KEY AUTO_INCREMENT,
+    teacher_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    group_id INT NOT NULL,
+    academic_year INT NOT NULL,
+    semester INT NOT NULL CHECK (semester BETWEEN 1 AND 2),
+    FOREIGN KEY (teacher_id) REFERENCES teachers(teacher_id) ON DELETE RESTRICT,
+    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE RESTRICT,
+    FOREIGN KEY (group_id) REFERENCES groups(group_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_teaching (teacher_id, subject_id, group_id, academic_year, semester),
+    INDEX idx_teacher (teacher_id),
+    INDEX idx_subject (subject_id),
+    INDEX idx_group (group_id)
+);
+CREATE TABLE grades (
+    grade_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    teaching_id INT NOT NULL,
+    grade INT NOT NULL CHECK (grade BETWEEN 1 AND 5),
+    exam_date DATE NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
+    FOREIGN KEY (teaching_id) REFERENCES teaching(teaching_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_grade (student_id, teaching_id),
+    INDEX idx_student (student_id),
+    INDEX idx_teaching (teaching_id),
+    INDEX idx_exam_date (exam_date)
+);
+INSERT INTO subject_categories (category_name, category_type) VALUES
+('Algebra', 'Mathematical'),
+('Geometry', 'Mathematical'),
+('Calculus', 'Mathematical'),
+('Physics', 'Technical'),
+('Chemistry', 'Technical'),
+('History', 'Humanitarian'),
+('Literature', 'Humanitarian'),
+('Philosophy', 'Humanitarian'),
+('Physical Education', 'Physical'),
+('Computer Science', 'Technical');
+INSERT INTO groups (group_name, specialization, year_of_admission) VALUES
+('101', 'Mathematics', 2022),
+('102', 'Mathematics', 2022),
+('103', 'Physics', 2023),
+('104', 'Philology', 2023),
+('201', 'Mathematics', 2021),
+('202', 'Physics', 2021);
+INSERT INTO students (first_name, last_name, patronymic, date_of_birth, email, phone_number, address, group_id, enrollment_year) VALUES
+('Иван', 'Петров', 'Сергеевич', '2004-03-15', 'ivan.petrov@mail.ru', '+7-999-123-45-67', 'ул. Ленина, 10', 1, 2022),
+('Мария', 'Иванова', 'Алексеевна', '2004-05-22', 'maria.ivanova@mail.ru', '+7-999-234-56-78', 'ул. Кутузова, 5', 1, 2022),
+('Петр', 'Сидоров', 'Ивванович', '2004-07-10', 'petr.sidorov@mail.ru', '+7-999-345-67-89', 'ул. Гагарина, 20', 2, 2022),
+('Анна', 'Смирнова', 'Владимировна', '2005-01-08', 'anna.smirnova@mail.ru', '+7-999-456-78-90', 'ул. Пушкина, 15', 2, 2022),
+('Сергей', 'Кузнецов', 'Николаевич', '2004-11-30', 'sergey.kuznetsov@mail.ru', '+7-999-567-89-01', 'ул. Толстого, 8', 3, 2023),
+('Елена', 'Морозова', 'Юрьевна', '2005-02-14', 'elena.morozova@mail.ru', '+7-999-678-90-12', 'ул. Достоевского, 12', 3, 2023),
+('Дмитрий', 'Волков', 'Андреевич', '2005-06-25', 'dmitry.volkov@mail.ru', '+7-999-789-01-23', 'ул. Чехова, 3', 4, 2023),
+('Ольга', 'Лебедева', 'Геннадьевна', '2005-04-18', 'olga.lebedeva@mail.ru', '+7-999-890-12-34', 'ул. Блока, 9', 4, 2023),
+('Виктор', 'Орлов', 'Павлович', '2003-09-12', 'viktor.orlov@mail.ru', '+7-999-901-23-45', 'ул. Лермонтова, 7', 5, 2021),
+('Наталья', 'Соколова', 'Ивановна', '2003-08-05', 'natalia.sokolova@mail.ru', '+7-999-012-34-56', 'ул. Грибоедова, 11', 5, 2021),
+('Александр', 'Попов', 'Викторович', '2003-12-20', 'alex.popov@mail.ru', '+7-998-123-45-67', 'ул. Есенина, 6', 6, 2021),
+('Зоя', 'Федорова', 'Борисовна', '2003-10-14', 'zoya.fedorova@mail.ru', '+7-998-234-56-78', 'ул. Маяковского, 14', 6, 2021);
+INSERT INTO teachers (first_name, last_name, patronymic, date_of_birth, email, phone_number, office_number, academic_degree, hire_date) VALUES
+('Виктор', 'Соколов', 'Владимирович', '1965-04-12', 'v.sokolov@university.ru', '+7-777-111-22-33', '301', 'кандидат физико-математических наук', '2000-09-01'),
+('Ирина', 'Красина', 'Павловна', '1972-06-20', 'i.krasina@university.ru', '+7-777-222-33-44', '302', 'доктор филологических наук', '2005-09-01'),
+('Артем', 'Новиков', 'Геннадьевич', '1968-08-15', 'a.novikov@university.ru', '+7-777-333-44-55', '303', 'кандидат физических наук', '2003-09-01'),
+('Юлия', 'Лебедева', 'Ивановна', '1975-11-28', 'y.lebedeva@university.ru', '+7-777-444-55-66', '304', 'доктор исторических наук', '2008-09-01'),
+('Сергей', 'Козлов', 'Анатольевич', '1960-02-10', 's.kozlov@university.ru', '+7-777-555-66-77', '305', 'кандидат технических наук', '1998-09-01'),
+('Таисия', 'Морозова', 'Сергеевна', '1978-05-17', 't.morozova@university.ru', '+7-777-666-77-88', '306', 'кандидат педагогических наук', '2010-09-01'),
+('Олег', 'Журавлев', 'Викторович', '1970-09-22', 'o.zhuravlev@university.ru', '+7-777-777-88-99', '307', 'доктор физических наук', '2002-09-01'),
+('Магдалина', 'Сергеева', 'Николаевна', '1973-03-30', 'm.sergeeva@university.ru', '+7-777-888-99-00', '308', 'кандидат химических наук', '2006-09-01');
+INSERT INTO subjects (subject_name, category_id, hours, semester) VALUES
+('Линейная алгебра', 1, 64, 1),
+('Математический анализ', 3, 80, 1),
+('Аналитическая геометрия', 2, 60, 2),
+('Дифференциальные уравнения', 3, 72, 3),
+('Общая физика', 4, 96, 1),
+('Молекулярная физика', 4, 80, 2),
+('Органическая химия', 5, 68, 2),
+('Всеобщая история', 6, 56, 1),
+('Русская литература', 7, 64, 1),
+('Введение в философию', 8, 52, 2),
+('Физическая культура', 9, 72, 1),
+('Информатика и программирование', 10, 80, 1);
+INSERT INTO teaching (teacher_id, subject_id, group_id, academic_year, semester) VALUES
+(1, 1, 1, 2024, 1),
+(1, 3, 1, 2024, 2),
+(3, 5, 1, 2024, 1),
+(8, 7, 1, 2024, 2),
+(1, 1, 2, 2024, 1),
+(1, 2, 2, 2024, 1),
+(7, 5, 2, 2024, 1),
+(8, 7, 2, 2024, 2),
+(3, 5, 3, 2024, 1),
+(1, 1, 3, 2024, 1),
+(3, 6, 3, 2024, 2),
+(7, 4, 3, 2024, 2),
+(2, 9, 4, 2024, 1),
+(4, 8, 4, 2024, 1),
+(2, 10, 4, 2024, 2),
+(6, 12, 4, 2024, 1),
+(1, 4, 5, 2024, 1),
+(7, 2, 5, 2024, 1),
+(5, 12, 5, 2024, 1),
+(3, 5, 5, 2024, 1),
+(7, 5, 6, 2024, 1),
+(5, 12, 6, 2024, 1),
+(4, 8, 6, 2024, 1);
+INSERT INTO grades (student_id, teaching_id, grade, exam_date) VALUES
+(1, 1, 5, '2024-12-10'),
+(1, 2, 4, '2024-11-15'),
+(1, 3, 4, '2024-12-05'),
+(2, 1, 4, '2024-12-10'),
+(2, 2, 5, '2024-11-15'),
+(2, 3, 5, '2024-12-05'),
+(3, 5, 3, '2024-12-12'),
+(3, 6, 2, '2024-11-20'),
+(3, 7, 3, '2024-12-18'),
+(4, 5, 4, '2024-12-12'),
+(4, 6, 3, '2024-11-20'),
+(4, 7, 4, '2024-12-18'),
+(5, 9, 3, '2024-12-08'),
+(5, 10, 3, '2024-11-10'),
+(5, 11, 2, '2024-12-15'),
+(6, 9, 5, '2024-12-08'),
+(6, 10, 5, '2024-11-10'),
+(6, 11, 5, '2024-12-15'),
+(7, 13, 4, '2024-12-11'),
+(7, 14, 4, '2024-11-22'),
+(8, 13, 5, '2024-12-11'),
+(8, 14, 5, '2024-11-22'),
+(9, 17, 4, '2024-12-09'),
+(9, 18, 4, '2024-11-18'),
+(9, 19, 5, '2024-12-16'),
+(10, 17, 5, '2024-12-09'),
+(10, 18, 5, '2024-11-18'),
+(10, 19, 4, '2024-12-16'),
+(11, 21, 4, '2024-12-07'),
+(11, 22, 4, '2024-11-25'),
+(12, 21, 3, '2024-12-07'),
+(12, 22, 4, '2024-11-25');
